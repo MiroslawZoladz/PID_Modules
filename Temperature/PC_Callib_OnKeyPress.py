@@ -1,7 +1,7 @@
 import serial, time
 import sys
 
-COM_NR = 29
+COM_NR = 2
 
 if len(sys.argv) > 1:
     COM_NR = sys.argv[1]

@@ -1,7 +1,7 @@
 import serial, time
 import sys
 
-COM_NR = 29
+COM_NR = 2
 
 if len(sys.argv) > 1:
     COM_NR = sys.argv[1]
@@ -27,7 +27,7 @@ else:
             for i in range(2):
                 _ = comm.readline()
             
-            time.sleep(0.9)
+            time.sleep(1.9)
             
     finally:
         comm.close()

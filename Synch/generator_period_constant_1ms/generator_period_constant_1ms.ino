@@ -13,6 +13,7 @@
 #define LED_PIN 13
 
 bool timestamp_received_flipflop = false;
+unsigned int T=10;
 
 void TimerConfig(){
   DDRB |= (1<<PB2); // !!!! alternatively pinMode(10, OUT);(PB2 - Uno, PB6 Leonardo) - setting pin connected to sqr_wave_gen direction to output
@@ -34,15 +35,21 @@ void setup() {
   
   Serial.begin(115200);
   Serial.setTimeout(-1);
-  Serial.println("generator");
+  
+  Serial.print("generator, T=");
+  Serial.print(T); 
+  Serial.println("ms");
   
   TimerConfig();
   TimerSetPeriod(40);
 }
 
 void loop() {
- unsigned int T = Serial.readStringUntil('\n').toInt();
+ T = Serial.readStringUntil('\n').toInt();
  TimerSetPeriod(T);   
+ Serial.print("T=");
+ Serial.print(T); 
+ Serial.println("ms");
 
  timestamp_received_flipflop = !timestamp_received_flipflop;
  digitalWrite(LED_PIN, timestamp_received_flipflop);

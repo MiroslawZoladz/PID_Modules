@@ -74,36 +74,26 @@ void Selector_Reject(){
 
 void setup() {  
   
-  // regenerator
-  
-  ////Regenerator_TimerConfig();        
-  ////Regenerator_SetPeriod((trigger_period*16)-1);
-  
+  // regenerator init  
   pinMode(REGENERATOR_TIMEBASE_PIN, INPUT_PULLUP);     
   EEPROM.get(0, regen_coeficient); 
   attachInterrupt(digitalPinToInterrupt(REGENERATOR_TIMEBASE_PIN), Regenerator_Timebase_OnChange, RISING);
   
-  // selecotr
-  
+  // selecotr init 
   pinMode(SELECTOR_TIMEBASE_PIN, INPUT_PULLUP);
-  pinMode(SELECTOR_REJECT_PIN, OUTPUT);
-    
+  pinMode(SELECTOR_REJECT_PIN, OUTPUT);    
   attachInterrupt(digitalPinToInterrupt(SELECTOR_TIMEBASE_PIN), Selector_Timebase_OnChange, RISING);
 
-  // common
+  // led init
   pinMode(LED_PIN, OUTPUT);
 
   // ZYBO_RST
-  pinMode(ZYBO_RST_PIN, OUTPUT);
-  digitalWrite(ZYBO_RST_PIN, LOW);
-  delay(1);
   digitalWrite(ZYBO_RST_PIN, HIGH);
+  pinMode(ZYBO_RST_PIN, OUTPUT);
 
+  // serial init
   Serial.begin(115200); 
-  Serial.setTimeout(0);
-  Serial.println("Synchronizer");
-  
-  Selector_Reject();  
+  Serial.setTimeout(0);  
 
   // hello world
   digitalWrite(LED_PIN, LOW);
@@ -114,6 +104,8 @@ void setup() {
     digitalWrite(LED_PIN, LOW);
     delay(500);
   }
+  Serial.println("Synchronizer");
+  Selector_Reject();  
 }
 
 // MAIN LOOP
@@ -166,34 +158,38 @@ void loop() {
           
       // execute
       switch (cmd_code){  
+        
+        case 'r': // reset zybo
+          digitalWrite(ZYBO_RST_PIN, LOW);
+          delay(1);
+          digitalWrite(ZYBO_RST_PIN, HIGH);  
+          Serial.println("zybo reset");                 
+        break;     
+        
+        case 'p': // set trigger period
+          trigger_period = cmd_arg;
+
+          Regenerator_TimerConfig();        
+          Regenerator_SetPeriod((trigger_period*16)-1);
+          Serial.println("period");
+        
+          if (!irq_occured) {            
+            Regenerator_SetPeriod((trigger_period*16)-2);
+          } else {
+            do_regen_callib = true;            
+          }
+        break;
+
+        case 't': // add timestamp
+          new_timestamp_f = true;                    
+        break;
 
         case 'd': // debug
           noInterrupts();
           ul_tmp = time_base_ctr;             
           interrupts(); 
           Serial.println(ul_tmp);          
-        break;
-        
-        case 's': // reset
-          Regenerator_TimerConfig();        
-          Regenerator_SetPeriod((trigger_period*16)-1);
-          Serial.println("start");
-        break;
-        
-        case 't': // add timestamp
-          new_timestamp_f = true;                    
-        break;
-        
-        case 'p': // set trigger period
-          trigger_period = cmd_arg;
-        
-          if (!irq_occured) {            
-            Regenerator_SetPeriod((trigger_period*16)-2);
-          } else {
-            do_regen_callib = true;
-            
-          }
-        break;
+        break;  
         
         default:;
      }    
