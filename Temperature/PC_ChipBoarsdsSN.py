@@ -15,7 +15,7 @@ def read_chipboards_sn(COM_NR):
         print("ERROR: Can't communicte with module - check comm nr\n")
     else:
         try:
-            comm.write("sn\r\n".encode('UTF-8'))
+            comm.write("cs\r\n".encode('UTF-8'))
             comm.flushOutput()
             for i in range(2):
                 _ = comm.readline().decode("utf-8").strip().replace('\\','').replace('r','').replace('n','').replace("'",'')

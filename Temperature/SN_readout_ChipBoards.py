@@ -6,7 +6,7 @@ uart = UART(1, baudrate=115200, tx=Pin(4), rx=Pin(5),timeout = 5000, timeout_cha
 while True:
     input()
     print('reading SN')
-    uart.write("i\n")
+    uart.write("s\n")
     r = uart.readline()
     print(r)
 

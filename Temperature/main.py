@@ -19,6 +19,8 @@ def temp_stab_thread():
     hardbeet = False
 
     # Temp Sensor
+    # 8-chip:  0x2826a795f0013c4c, 0x2817d395f0013ce4, 0x28fb0f8a0d000029
+    # 32-chip: 0x28aba78a0d00000a,0x28dc5a95f0013cbb,0x2865ca95f0013c9d,0x28d3f395f0013c5f
     ID_l = 0x2826a795f0013c4c, 0x2817d395f0013ce4, 0x28fb0f8a0d000029
     ds_pin = Pin(28)
     ds_sensor = ds18x20.DS18X20(onewire.OneWire(ds_pin))
@@ -94,8 +96,24 @@ def comm_thread():
                 lock.acquire()
                 set_temp_l = _
                 lock.release()
-            elif il[0]=='sn':
-                uart.write("i\n")
+            elif il[0]=='cs':
+                uart.write("s\n")
+                r = uart.readline()
+                print(r)
+            elif il[0]=='ct':
+                uart.write("t\n")
+                r = uart.readline()
+                print(r)
+            elif il[0]=='cr':
+                uart.write("r\n")
+                r = uart.readline()
+                print(r)
+            elif il[0]=='cC':
+                uart.write("C\n")
+                r = uart.readline()
+                print(r)
+            elif il[0]=='cc':
+                uart.write("c\n")
                 r = uart.readline()
                 print(r)
             else:

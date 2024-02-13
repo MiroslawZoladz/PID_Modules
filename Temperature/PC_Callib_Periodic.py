@@ -27,7 +27,7 @@ else:
             for i in range(2):
                 _ = comm.readline()
             
-            time.sleep(1.9)
+            time.sleep(0.4)
             
     finally:
         comm.close()
