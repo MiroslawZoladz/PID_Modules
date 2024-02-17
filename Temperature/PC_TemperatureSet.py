@@ -1,8 +1,8 @@
 import serial, time
 import sys
 
-COM_NR = 29
-TEMP = 2.89
+COM_NR = 2
+TEMP = 25.0
 
 if len(sys.argv) == 2:
     TEMP = float(sys.argv[1])

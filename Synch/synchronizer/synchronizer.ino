@@ -6,7 +6,8 @@
 #define LED_PIN 13
 
 // ZYBO reset
-#define ZYBO_RST_PIN  6
+#define ZYBO_RST_PIN  6 
+
 
 //  regenerator  
 #define REGENERATOR_TIMEBASE_PIN  2
@@ -37,7 +38,11 @@ void Regenerator_TimerConfig(){
   TCCR1B |= (1<<WGM13)|(1<<WGM12); //further setting timer mode and setting prescaler to 0(clock disabled)
   TCCR1B &= ~((1<<ICNC1)|(1<<ICES1)|(1<<CS12)|(1<<CS11)|(1<<CS10));
 
-  TCCR1A |= (1<<COM1B1); // ??
+  TCCR1A |= (1<<COM1B1); // enable Compare Output Mode, Fast PWM
+}
+
+void Regenerator_Stop(){
+  TCCR1A &= ~((1<<COM1A1)|(1<<COM1A0)|(1<<COM1B0)|(1<<COM1B1)); // disable Compare Output Mode, Fast PWM 
 }
 
 void Regenerator_SetPeriod(unsigned int T){ // in 1/16 us
@@ -164,9 +169,19 @@ void loop() {
           delay(1);
           digitalWrite(ZYBO_RST_PIN, HIGH);  
           Serial.println("zybo reset");                 
-        break;     
+        break;   
+
+        case 's': // set trigger period
+          Regenerator_Stop();
+          noInterrupts();
+          ul_tmp = time_base_ctr=0;             
+          interrupts(); 
+          Serial.println("stop");
+        break;
         
-        case 'p': // set trigger period
+        case 'p': // start trigger & set trigger period
+          Selector_Reject();
+          
           trigger_period = cmd_arg;
 
           Regenerator_TimerConfig();        
