@@ -3,11 +3,10 @@
 // ----- PINS ---------
 
 //  common 
-#define LED_PIN 13
+#define LED_BUILTIN 13
 
 // ZYBO reset
 #define ZYBO_RST_PIN  6 
-
 
 //  regenerator  
 #define REGENERATOR_TIMEBASE_PIN  2
@@ -30,6 +29,10 @@ volatile bool do_regen_callib;
 volatile bool save_regen_coeficient;
 
 volatile bool irq_occured;
+
+bool correction_done_marker;
+
+bool led_state;
 
 void Regenerator_TimerConfig(){
   DDRB |= (1<<PB2); //alternatively pinMode(10, OUT);(PB2 - Uno, PB6 Leonardo) - setting pin connected to sqr_wave_gen direction to output
@@ -90,7 +93,7 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(SELECTOR_TIMEBASE_PIN), Selector_Timebase_OnChange, RISING);
 
   // led init
-  pinMode(LED_PIN, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
 
   // ZYBO_RST
   digitalWrite(ZYBO_RST_PIN, HIGH);
@@ -101,14 +104,11 @@ void setup() {
   Serial.setTimeout(0);  
 
   // hello world
-  digitalWrite(LED_PIN, LOW);
-  delay(1000);
-  for (byte i = 0; i < 3; i++){
-    digitalWrite(LED_PIN, HIGH);
-    delay(50); 
-    digitalWrite(LED_PIN, LOW);
-    delay(500);
-  }
+  //for (byte i = 0; i < 10; i++){
+  //  digitalWrite(LED_BUILTIN, led_state);
+  //  led_state = !led_state; 
+  //  delay(500); 
+  //}  
   Serial.println("Synchronizer");
   Selector_Reject();  
 }
@@ -163,13 +163,25 @@ void loop() {
           
       // execute
       switch (cmd_code){  
-        
+        case 'i': // get ID 
+          Serial.println("Synchronizer");                 
+        break;  
+             
         case 'r': // reset zybo
           digitalWrite(ZYBO_RST_PIN, LOW);
           delay(1);
           digitalWrite(ZYBO_RST_PIN, HIGH);  
-          Serial.println("zybo reset");                 
+          Serial.println("reset mainboard");                 
         break;   
+		  
+  		  case 'c': // check-and-set correction marker
+  			 if (correction_done_marker) {
+  				Serial.println("corrected");
+  			 } else {
+  				Serial.println("not_corrected");
+  			 }				 
+  			 correction_done_marker = true;
+        break; 
 
         case 's': // set trigger period
           Regenerator_Stop();
@@ -179,7 +191,7 @@ void loop() {
           Serial.println("stop");
         break;
         
-        case 'p': // start trigger & set trigger period
+        case 'p': // set trigger period -> start trigger
           Selector_Reject();
           
           trigger_period = cmd_arg;
@@ -195,8 +207,10 @@ void loop() {
           }
         break;
 
-        case 't': // add timestamp
-          new_timestamp_f = true;                    
+        case 't': // add timestamp        
+          new_timestamp_f = true;
+          digitalWrite(LED_BUILTIN, led_state);
+          led_state = !led_state;
         break;
 
         case 'd': // debug
@@ -240,13 +254,12 @@ void loop() {
      for(byte i = 0; i < MAX_TSTAMP_NR; i++){      
         if(tstamps[i].valid == false){
            tstamps[i].valid = true;
-           tstamps[i].ulValue = cmd_arg;
-           
+           tstamps[i].ulValue = cmd_arg;           
            break;
         }
      }
      if(i==MAX_TSTAMP_NR){
-        digitalWrite(LED_PIN, LOW); // ! dlaczewgo low
+        digitalWrite(LED_BUILTIN, LOW); // ! dlaczewgo low
      }
   }
 
