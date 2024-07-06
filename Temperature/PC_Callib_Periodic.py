@@ -2,11 +2,7 @@ import serial, time
 import sys
 
 COM_NR = 2
-
-if len(sys.argv) > 1:
-    COM_NR = sys.argv[1]
-
-print(f'COMM: {COM_NR}')
+print(f'Started')
 
 try:
     comm = serial.Serial(f'Com{COM_NR}',115200,timeout=1)
@@ -28,6 +24,7 @@ else:
                 _ = comm.readline()
             
             time.sleep(0.4)
-            
+    except:
+        print("Stopped")            
     finally:
         comm.close()
