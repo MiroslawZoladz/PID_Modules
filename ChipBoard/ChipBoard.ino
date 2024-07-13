@@ -81,6 +81,7 @@ void setup() {
   // Callib, Set PWM frequency for D5 & D6
   TCCR0B = TCCR0B & B11111000 | B00000001;    // set timer 0 divisor to     1 for PWM frequency of 62500.00 Hz  
   pinMode(6, OUTPUT);
+  analogWrite(6, 25); //10% PWM
 }
 
 void loop (){
